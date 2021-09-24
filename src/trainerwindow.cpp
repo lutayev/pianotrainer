@@ -10,27 +10,33 @@ TrainerWindow::TrainerWindow(QWidget *parent) :
     ui->setupUi(this);
 
 
-    std::shared_ptr<AbstractPlayView> audioView = std::make_shared<PlaySoundView>(m_soundViewName, this);
-    std::shared_ptr<AbstractPlayView> pianoView = std::make_shared<PlayPianoView>(m_keyboardViewName, this);
+    //Async listener without GUI
+    std::shared_ptr<AbstractPlayView> soundListener = std::make_shared<PlaySoundListener>(m_soundListenerName, this, true);
 
-    ui->gbControl->layout()->addWidget(audioView.get());
-    ui->gbKeyboard->layout()->addWidget(pianoView.get());
+    //Gui listeners
+    std::shared_ptr<AbstractPlayView> controlsListener = std::make_shared<PlaySoundView>(m_controlsListenerName, this, false);
+    std::shared_ptr<AbstractPlayView> keyboardListener = std::make_shared<PlayPianoView>(m_keyboardListenerName, this, false);
 
-    m_controller = new PlayController(nullptr, audioView);
-    m_controller->addView(pianoView);
-    audioView->setEnabled(false);
+    ui->gbControl->layout()->addWidget(controlsListener.get()->getWidget());
+    ui->gbKeyboard->layout()->addWidget(keyboardListener.get()->getWidget());
+
+    m_controller = new PlayController(nullptr, soundListener);
+
+    m_controller->addView(controlsListener);
+    m_controller->addView(keyboardListener);
+    controlsListener->getWidget()->setEnabled(false);
 
     connect(ui->btnOpen, SIGNAL(clicked()), this, SLOT(loadSong()));
 
     connect(ui->cbDetachKeyboard, &QCheckBox::stateChanged, [this]() {
         QWidget* parent = (ui->cbDetachKeyboard->isChecked() ? nullptr : ui->gbKeyboard);
-        m_controller->attach(m_keyboardViewName, parent);
+        m_controller->attach(m_keyboardListenerName, parent);
     });
 
 
     connect(ui->cbDetachControls, &QCheckBox::stateChanged, [this]() {
         QWidget* parent = (ui->cbDetachControls->isChecked() ? nullptr : ui->gbControl);
-        m_controller->attach(m_soundViewName, parent);
+        m_controller->attach(m_controlsListenerName, parent);
     });
 }
 

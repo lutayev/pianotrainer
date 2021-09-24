@@ -104,7 +104,6 @@ void PlayController::updateStateLoop()
             time = elapsedTime + startTime + timeShift;
             m_position = m_songModel->getTickForTime(time);
 
-            qDebug() << m_position << lastPos;
             if (m_position != lastPos) {
 //                qDebug() << "LOOP::Playing:\tElapsed time - " + QString::number(elapsedTime) +
 //                            ", Start time - " + QString::number(startTime) +
@@ -149,7 +148,7 @@ void PlayController::setSong(std::shared_ptr<SongModel> model)
 
     for (auto it : m_views) {
         it.second->setSong(model);
-        it.second->setEnabled(true);
+        it.second->getWidget()->setEnabled(true);
     }
     emit sigStop();
 }
@@ -169,7 +168,7 @@ void PlayController::addView(std::shared_ptr<AbstractPlayView> view)
         view->setSong(m_songModel);
     }
 
-    QObject::connect(this, &PlayController::sigPlay, view.get(), &AbstractPlayView::onPlay, Qt::DirectConnection);
+    QObject::connect(this, &PlayController::sigPlay, view.get(), &AbstractPlayView::onPlay, Qt::BlockingQueuedConnection);
     QObject::connect(this, &PlayController::sigPause, view.get(), &AbstractPlayView::onPause, Qt::QueuedConnection);
     QObject::connect(this, &PlayController::sigStop, view.get(), &AbstractPlayView::onStop, Qt::QueuedConnection);
     QObject::connect(this, &PlayController::sigPlayPos, view.get(), &AbstractPlayView::onPlayPos, Qt::QueuedConnection);

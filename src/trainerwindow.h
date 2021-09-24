@@ -6,6 +6,7 @@
 #include "playcontroller.h"
 #include "playpianoview.h"
 #include "playsoundview.h"
+#include "playsoundlistener.h"
 
 namespace Ui {
 class TrainerWindow;
@@ -26,9 +27,9 @@ private:
     Ui::TrainerWindow *ui;
 
     PlayController* m_controller;
-    QString         m_keyboardViewName {"Keyboard"};
-    QString         m_soundViewName {"Sound"};
-    QString         m_controlsViewName {"Controls"};
+    QString         m_keyboardListenerName {"Keyboard"};
+    QString         m_controlsListenerName {"Controls"};
+    QString         m_soundListenerName {"Sound"};
 };
 
 #endif // TRAINERWINDOW_H

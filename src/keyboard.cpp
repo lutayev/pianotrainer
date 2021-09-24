@@ -21,6 +21,8 @@ void Keyboard::setRange(std::pair<uint8_t, uint8_t> range)
         }
         else m_keys[i]->setVisible(true);
     }
+
+    reset();
 }
 
 bool Keyboard::isPressed(uint8_t key) const noexcept
@@ -57,7 +59,7 @@ void Keyboard::press(uint8_t key, Keyboard::KeyState state)
 
 void Keyboard::reset()
 {
-    for (int i = m_rangeMin; i < m_rangeMax; ++i) {
+    for (int i = m_rangeMin; i <= m_rangeMax; ++i) {
         m_keys[i]->setStyleSheet(m_defaultStyle);
     }
 }

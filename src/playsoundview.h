@@ -9,7 +9,7 @@
 class PlaySoundView : public AbstractPlayView
 {
 public:
-    PlaySoundView(const QString& name = "audioView", QWidget* parent = 0);
+    PlaySoundView(const QString& name = "audioView", QWidget* parent = 0, bool async = false);
     virtual ~PlaySoundView();
 
 protected:
@@ -21,9 +21,9 @@ protected:
     virtual void dispatchJmpPos(qint32 pos);
     virtual void dispatchTempo(float tempo);
 
+    void onEvent(QMidiEvent* event, float delay);
+
 private:
-    QMidiOut            m_midiOut;
-    qint32              m_lastEventIndex{0};
     QSpinBox*           m_sbPosition;
     QPushButton*        m_btnStop;
     QPushButton*        m_btnPlay;

@@ -16,7 +16,7 @@ class PlayPianoView : public AbstractPlayView
     Q_OBJECT
 
 public:
-    explicit PlayPianoView(const QString& name = "PianoView", QWidget *parent = nullptr);
+    explicit PlayPianoView(const QString& name = "PianoView", QWidget *parent = nullptr, bool async = false);
     ~PlayPianoView() override;
 
 
@@ -29,11 +29,12 @@ protected:
     void dispatchJmpPos(qint32 pos) override;
     void dispatchTempo(float tempo) override;
 
+    void onEvent(QMidiEvent* event, float delay);
+
 private:
     void reset();
 
-    Keyboard*    m_keyboard;
-    qint32 m_lastIndex{0};
+    Keyboard*   m_keyboard;
     QLabel*     m_lblLength;
 
 //    std::unordered_map<uint8_t, QWidget*> m_keys;

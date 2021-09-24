@@ -12,6 +12,7 @@ set(HEADER
         src/trainerwindow.h
         src/playcontroller.h
         src/abstractplayview.h
+        src/playsoundlistener.h
         src/playsoundview.h
         src/playpianoview.h
         src/songmodel.h
@@ -24,6 +25,7 @@ set(SOURCE
         src/trainerwindow.cpp
         src/playcontroller.cpp
         src/abstractplayview.cpp
+        src/playsoundlistener.cpp
         src/playsoundview.cpp
         src/playpianoview.cpp
         src/songmodel.cpp

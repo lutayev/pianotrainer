@@ -7,7 +7,8 @@
 
 #include "playsoundview.h"
 
-PlaySoundView::PlaySoundView(const QString& name, QWidget* parent) : AbstractPlayView(name, parent)
+PlaySoundView::PlaySoundView(const QString& name, QWidget* parent, bool async)
+    : AbstractPlayView(name, parent, async)
 {
     m_cachedPosition = 0;
     m_lastEventIndex = 0;
@@ -43,7 +44,7 @@ PlaySoundView::PlaySoundView(const QString& name, QWidget* parent) : AbstractPla
     vLayout->addItem(hLayout);
     vLayout->addWidget(m_slPosition);
 
-    this->setLayout(vLayout);
+    m_widget->setLayout(vLayout);
 
     connect(m_btnStop, &QPushButton::clicked, this, &PlaySoundView::sigStopGenerated);
 
@@ -84,16 +85,13 @@ PlaySoundView::PlaySoundView(const QString& name, QWidget* parent) : AbstractPla
 
 PlaySoundView::~PlaySoundView()
 {
-    qDebug() << "destructor";
-    m_midiOut.disconnect();
+
 }
 
 void PlaySoundView::dispatchPlay()
 {
     qDebug() << "Dispatch play";
     m_btnPlay->setText("Pause");
-    if (!m_midiOut.isConnected())
-        m_midiOut.connect("0");
     int max = m_song->getEndPos();
     m_slPosition->setRange(0, max);
     m_sbPosition->setRange(0, max);
@@ -103,16 +101,11 @@ void PlaySoundView::dispatchPause()
 {
     qDebug() << "Dispatch pause";
     m_btnPlay->setText("Play");
-    //m_lastIndex = 0;
-    //m_lastIndex = 0;
 }
 
 void PlaySoundView::dispatchStop()
 {
     qDebug() << "Dispatch Stop";
-    m_lastEventIndex = 0;
-    m_cachedPosition = 0;
-    m_midiOut.disconnect();
     m_btnPlay->setText("Play");
     m_sbPosition->setValue(0);
     m_slPosition->setValue(0);
@@ -120,40 +113,33 @@ void PlaySoundView::dispatchStop()
 
 void PlaySoundView::dispatchPlayPos(qint32 pos)
 {
-    qDebug() << "Dispatch POS " + QString::number(pos);
     m_sbPosition->setValue(pos);
     m_slPosition->setValue(pos);
 
-    //Imitate laggy processing
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//    qint32 lastEventTick = 0;
+//    while (m_lastEventIndex < m_events.size()) {
+//        QMidiEvent* event = m_events.at(m_lastEventIndex);
+//        lastEventTick = event->tick();
 
-    qint32 lastEventTick = 0;
-    while (m_lastEventIndex < m_events.size()) {
-        QMidiEvent* event = m_events.at(m_lastEventIndex);
-        lastEventTick = event->tick();
+//        if (lastEventTick <= pos) {
 
-        if (lastEventTick <= pos) {
-            //qDebug() << "Processing " + QString::number(m_lastEventIndex) + " of " + QString::number(m_events.size())
-            //         << "Last tick " + QString::number(lastEventTick) + ", POS " + QString::number(pos);
-
-            if (event->type() == QMidiEvent::Meta || event->type() == QMidiEvent::SysEx) {
-                m_midiOut.sendEvent(*event);
-                ++m_lastEventIndex;
-                continue;
-            }
-            ++m_lastEventIndex;
-            qint32 msg = event->message();
-            m_midiOut.sendEvent(*event);
-            //qDebug() << "Send event message " + QString::number(msg);
-        } else {
-            break;
-        }
-    }
+//            if (event->type() == QMidiEvent::Meta || event->type() == QMidiEvent::SysEx) {
+//                m_midiOut.sendEvent(*event);
+//                ++m_lastEventIndex;
+//                continue;
+//            }
+//            ++m_lastEventIndex;
+//            qint32 msg = event->message();
+//            m_midiOut.sendEvent(*event);
+//            //qDebug() << "Send event message " + QString::number(msg);
+//        } else {
+//            break;
+//        }
+//    }
 }
 
 void PlaySoundView::dispatchJmpPos(qint32 pos)
 {
-    m_midiOut.stopAll();
     for (qint32 i = 0; i < m_events.size(); ++i) {
         if (m_events.at(i)->tick() >= pos) {
             qDebug() << "Set last index" << i << m_lastEventIndex;
@@ -168,4 +154,9 @@ void PlaySoundView::dispatchJmpPos(qint32 pos)
 void PlaySoundView::dispatchTempo(float tempo)
 {
     m_slTempo->setValue(tempo * 100);
+}
+
+void PlaySoundView::onEvent(QMidiEvent *event, float delay)
+{
+
 }

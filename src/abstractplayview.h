@@ -17,16 +17,18 @@
 #include "songmodel.h"
 
 
-class AbstractPlayView : public QWidget
+class AbstractPlayView : public QObject
 {
     Q_OBJECT
 public:
-    AbstractPlayView(const QString& name = "default", QWidget* parent = 0);
-    virtual ~AbstractPlayView() = default;
+    //Async flag for non-GUI listeners, run in separate thread
+    AbstractPlayView(const QString& name = "default", QWidget* parent = 0, bool async = false);
+    virtual ~AbstractPlayView();
 
-    QString getModelName() const noexcept;
-    void setSong(std::shared_ptr<SongModel> song);
-    void attach(QWidget* parent);
+    QString     getModelName() const noexcept;
+    QWidget*    getWidget() const noexcept;
+    void        setSong(std::shared_ptr<SongModel> song);
+    void        attach(QWidget* parent);
 
 public slots:
     //Virtual slots are 10 times slower, so implement usual slots and signals dispatchers, with handling "dispatcher busy" situation
@@ -56,6 +58,10 @@ public slots:
     }
     inline void onStop()
     {
+        m_lastEventIndex = 0;
+        m_cachedPosition = 0;
+        m_lastIndex = 0;
+
         if (!m_lazyDispatchStop) {
             dispatchStop();
             return;
@@ -67,6 +73,8 @@ public slots:
     }
     inline void onPlayPos(qint32 pos)
     {
+        easyParseEvents(pos);
+
         if (!m_lazyDispatchPlayPos) {
             dispatchPlayPos(pos);
             return;
@@ -78,6 +86,15 @@ public slots:
     }
     inline void onJmpPos(qint32 pos)
     {
+        for (qint32 i = 0; i < m_events.size(); ++i) {
+            if (m_events.at(i)->tick() < pos) {
+                continue;
+            } else {
+                m_lastIndex = i + 1;
+                break;
+            }
+        }
+
         if (!m_lazyDispatchJmpPos) {
             dispatchJmpPos(pos);
             return;
@@ -108,11 +125,19 @@ protected:
     virtual void dispatchJmpPos(qint32 pos) = 0;
     virtual void dispatchTempo(float tempo) = 0;
 
+    //Utilitary functions to parse position and produce interface for handle events rather than raw position
+    void easyParseEvents(quint32 pos);
+    virtual void onEvent(QMidiEvent* event, float delay) = 0;
+
     //State
     std::shared_ptr<SongModel>      m_song;
+    QList<QMidiEvent*>              m_events;
     std::atomic<qint32>             m_cachedPosition{0};
     QMidiFile*                      m_midiFile{nullptr};
-    QList<QMidiEvent*>              m_events;
+    QWidget*                        m_widget {nullptr};
+    QThread*                        m_thread {nullptr};
+    qint32                          m_lastEventIndex{0};
+    int                             m_lastIndex{0};
 
     //Strategy: skip or not incoming signals from controller when busy
     std::atomic<bool>               m_lazyDispatchPlay{true};
@@ -156,9 +181,6 @@ private:
         m_mtxTempo.unlock();
     }
 
-    QString     m_ModelName;
-    QThread     m_thread;
-
     //Busy dispatchers flags
     std::mutex  m_mtxPlay;
     std::mutex  m_mtxPause;
@@ -166,6 +188,8 @@ private:
     std::mutex  m_mtxPlayPos;
     std::mutex  m_mtxJmpPos;
     std::mutex  m_mtxTempo;
+
+    QString     m_ModelName;
 
 signals:
     //Signals for controller
