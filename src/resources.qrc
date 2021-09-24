@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file alias="pianotrainer.qml">pianotrainer.qml</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>img/black_key.png</file>
+        <file>img/white_key.png</file>
+    </qresource>
+</RCC>

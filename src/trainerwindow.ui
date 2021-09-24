@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TrainerWindow</class>
+ <widget class="QWidget" name="TrainerWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>370</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Piano Trainer</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="vLay">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="lblFile">
+         <property name="text">
+          <string>No file selected</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnOpen">
+         <property name="text">
+          <string>Open</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="gbControl">
+       <property name="title">
+        <string>Controls</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout"/>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="gbKeyboard">
+       <property name="title">
+        <string>Piano Keyboard</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="cbDetachKeyboard">
+     <property name="text">
+      <string>Detach keyboard</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="cbDetachControls">
+     <property name="text">
+      <string>Detach controls</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
